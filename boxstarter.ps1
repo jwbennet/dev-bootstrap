@@ -21,6 +21,8 @@ wsl --install --distribution Ubuntu --no-launch
 wsl --set-default-version 2
 wsl --export Ubuntu "$env:TEMP\ubuntu.tar.gz"
 wsl --import dev "$env:TEMP\wsl-dev" "$env:TEMP\ubuntu.tar.gz"
+wsl --set-default dev
+wsl --unregister Ubuntu
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
