@@ -2,6 +2,7 @@
 
 choco install -y chezmoi
 
+winget list --accept-source-agreements --accept-package-agreements
 winget install -e --id 7zip.7zip
 winget install -e --id Docker.DockerDesktop
 winget install -e --id GitHub.GitHubDesktop
