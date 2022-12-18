@@ -17,7 +17,8 @@ winget install -e --id Microsoft.WindowsTerminal
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
 choco install wsl2 --params "/Version:2 /Retry:true"
-wsl --install --distribution Ubuntu-20.04
+# wsl --install --distribution Ubuntu-20.04
+winget install -e --id Canonical.Ubuntu.2204
 wsl --set-default-version 2
 
 
