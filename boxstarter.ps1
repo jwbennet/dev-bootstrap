@@ -15,9 +15,8 @@ winget install -e --id Postman.Postman
 winget install -e --id Microsoft.WindowsTerminal
 
 # Windows Sub-system for Linux
+wsl --install --distribution Ubuntu-20.04
 wsl --set-default-version 2
-winget install -e --id Canonical.Ubuntu.2204
-# wsl --install --distribution Ubuntu-22.04
 
 
 #Enable-MicrosoftUpdate
