@@ -1,10 +1,13 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
-# Disable-UAC
-# $Boxstarter.AutoLogin=$false
-
 choco install -y chezmoi
 
-# Enable-UAC
+winget install -e --id 7zip.7zip
+winget install -e --id Docker.DockerDesktop
+winget install -e --id GitHub.GitHubDesktop
+winget install -e --id Google.Chrome
+winget install -e --id Postman.Postman
+winget install -e --id Microsoft.WindowsTerminal
+
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
