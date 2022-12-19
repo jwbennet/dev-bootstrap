@@ -1,7 +1,7 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
 # We start by refreshing environment variables in case we needed to install Chocolatey before this execution and need to update the PATH
-RefreshEnv
+#RefreshEnv
 
 # Boxstarter options
 $Boxstarter.RebootOk=$true
