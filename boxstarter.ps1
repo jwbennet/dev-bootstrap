@@ -3,6 +3,11 @@
 # We start by refreshing environment variables in case we needed to install Chocolatey before this execution and need to update the PATH
 RefreshEnv
 
+# Boxstarter options
+$Boxstarter.RebootOk=$true
+$Boxstarter.NoPassword=$false
+$Boxstarter.AutoLogin=$true
+
 Enable-RemoteDesktop
 
 choco install -y chezmoi
