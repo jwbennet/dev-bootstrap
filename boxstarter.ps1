@@ -40,13 +40,27 @@ else
     Write-Host "The user $env:UserName has already been setup."
 }
 
+function installWinGetPackage {
+    Param ([string]$packageId)
+    $packageInstalled=winget list --id $packageId --accept-source-agreements
+    if ($?)
+    {
+        Write-Host "Package id '$packageId' is already installed"
+    }
+    else
+    {
+        Write-Host "Installing package '$packageId'"
+        winget install --exact --id $packageId --accept-source-agreements --accept-package-agreements
+    }
+}
+
 # Install Applications
-winget install -e --id 7zip.7zip --accept-source-agreements --accept-package-agreements
-winget install -e --id Docker.DockerDesktop --accept-source-agreements --accept-package-agreements
-winget install -e --id GitHub.GitHubDesktop --accept-source-agreements --accept-package-agreements
-winget install -e --id Google.Chrome --accept-source-agreements --accept-package-agreements
-winget install -e --id Postman.Postman --accept-source-agreements --accept-package-agreements
-winget install -e --id Microsoft.WindowsTerminal --accept-source-agreements --accept-package-agreements
+installWinGetPackage 7zip.7zip
+installWinGetPackage Docker.DockerDesktop
+installWinGetPackage GitHub.GitHubDesktop
+installWinGetPackage Google.Chrome
+installWinGetPackage Postman.Postman
+installWinGetPackage Microsoft.WindowsTerminal
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
