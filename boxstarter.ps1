@@ -1,11 +1,11 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
+# We start by refreshing environment variables in case we needed to install Chocolatey before this execution and need to update the PATH
+RefreshEnv
+
 Enable-RemoteDesktop
 
 choco install -y chezmoi
-
-# This step accepts the Microsoft Store agreement so we can install packages from there
-winget list --accept-source-agreements --accept-package-agreements
 
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
@@ -21,12 +21,12 @@ wsl --unregister Ubuntu
 wsl useradd -m -G sudo -s /bin/bash "jwbennet"
 
 # Install Applications
-winget install -e --id 7zip.7zip
-winget install -e --id Docker.DockerDesktop
-winget install -e --id GitHub.GitHubDesktop
-winget install -e --id Google.Chrome
-winget install -e --id Postman.Postman
-winget install -e --id Microsoft.WindowsTerminal
+winget install -e --id 7zip.7zip --accept-source-agreements --accept-package-agreements
+winget install -e --id Docker.DockerDesktop --accept-source-agreements --accept-package-agreements
+winget install -e --id GitHub.GitHubDesktop --accept-source-agreements --accept-package-agreements
+winget install -e --id Google.Chrome --accept-source-agreements --accept-package-agreements
+winget install -e --id Postman.Postman --accept-source-agreements --accept-package-agreements
+winget install -e --id Microsoft.WindowsTerminal --accept-source-agreements --accept-package-agreements
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
