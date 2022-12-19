@@ -3,11 +3,6 @@
 # We start by refreshing environment variables in case we needed to install Chocolatey before this execution and need to update the PATH
 RefreshEnv
 
-# Boxstarter options
-# $Boxstarter.RebootOk=$true
-# $Boxstarter.NoPassword=$false
-# $Boxstarter.AutoLogin=$true
-
 Enable-RemoteDesktop
 
 choco install -y chezmoi
@@ -19,6 +14,8 @@ choco install -y VirtualMachinePlatform -source windowsfeatures
 wsl --set-default-version 2
 choco install wsl2 --params "/Version:2 /Retry:true"
 wsl --install --distribution Ubuntu
+Write-Host "WSL should open in a new window. Allow it to install and setup a base user then press ENTER." -ForegroundColor Green
+Read-Host
 wsl --export Ubuntu "$env:TEMP\ubuntu.tar.gz"
 wsl --import dev "$env:TEMP\wsl-dev" "$env:TEMP\ubuntu.tar.gz"
 wsl --set-default dev
