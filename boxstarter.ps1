@@ -1,26 +1,44 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
-# We start by refreshing environment variables in case we needed to install Chocolatey before this execution and need to update the PATH
-RefreshEnv
-
 Enable-RemoteDesktop
+Set-ExecutionPolicy Unrestricted
 
-choco install -y chezmoi
+choco install -y chezmoi Boxstarter
 
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
 choco install -y Microsoft-Windows-Subsystem-Linux -source windowsfeatures
 choco install -y VirtualMachinePlatform -source windowsfeatures
-wsl --set-default-version 2
 choco install wsl2 --params "/Version:2 /Retry:true"
-wsl --install --distribution Ubuntu
-Write-Host "WSL should open in a new window. Allow it to install and setup a base user then press ENTER." -ForegroundColor Green
-Read-Host
-wsl --export Ubuntu "$env:TEMP\ubuntu.tar.gz"
-wsl --import dev "$env:TEMP\wsl-dev" "$env:TEMP\ubuntu.tar.gz"
-wsl --set-default dev
-wsl --unregister Ubuntu
-wsl useradd -m -G sudo -s /bin/bash "jwbennet"
+
+# Check to see if the "dev" WSL distribution exsists. If not, create it.
+$wslDistributions=wsl --list --quiet
+if ( -not ($wslDistributions -contains "dev"))
+{
+    wsl --set-default-version 2
+    wsl --install --distribution Ubuntu
+    # Sleep to give the Ubuntu installation time to occur
+    Start-Sleep -Seconds 30
+    wsl --export Ubuntu "$env:TEMP\ubuntu.tar.gz"
+    wsl --import dev "$env:TEMP\wsl-dev" "$env:TEMP\ubuntu.tar.gz"
+    wsl --set-default dev
+    wsl --unregister Ubuntu
+} else {
+    Write-Host "There is already a 'dev' WSL distribution so skipping its configuration."
+}
+
+# Ensure the WSL user is created based on the current Windows username
+$wslUserExists=wsl id -u "$env:UserName"
+if (-not $?)
+{
+    wsl useradd -m -G sudo -s /bin/bash "$env:UserName"
+    wsl /bin/bash -c "echo '$($env:UserName):changeme' | chpasswd"
+    wsl passwd -e "$env:UserName"
+}
+else
+{
+    Write-Host "The user $env:UserName has already been setup."
+}
 
 # Install Applications
 winget install -e --id 7zip.7zip --accept-source-agreements --accept-package-agreements
