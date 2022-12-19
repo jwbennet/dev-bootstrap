@@ -4,5 +4,5 @@ This project is a repository of the scripts needed to setup my personal workstat
 
 ## Setup steps
 
-* Execute [Boxstarter](https://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/jwbennet/dev-bootstrap/main/boxstarter.ps1)
+* Execute [Boxstarter](https://boxstarter.org/package/url?https://raw.githubusercontent.com/jwbennet/dev-bootstrap/main/boxstarter.ps1)
     * Note: This must be done in Microsoft Edge due to the use of an app launcher which is only supported there out of the box
