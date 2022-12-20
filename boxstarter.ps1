@@ -4,6 +4,9 @@ Enable-RemoteDesktop
 # Update-ExecutionPolicy Unrestricted
 
 choco install -y chezmoi Boxstarter
+RefreshEnv
+
+chezmoi init --apply jwbennet
 
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
