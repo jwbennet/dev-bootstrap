@@ -1,0 +1,25 @@
+{
+  "name": "dev-bootstrap",
+  "version": "1.0.0",
+  "description": "This project is a repository of the scripts needed to setup my personal workstation.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwbennet/dev-bootstrap.git"
+  },
+  "author": "James Bennett (jwbennet@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jwbennet/dev-bootstrap/issues"
+  },
+  "homepage": "https://github.com/jwbennet/dev-bootstrap#readme",
+  "devDependencies": {
+    "semantic-release": "19.0.5",
+    "@semantic-release/git": "10.0.1",
+    "semantic-release-nuget": "1.1.1"
+  }
+}
