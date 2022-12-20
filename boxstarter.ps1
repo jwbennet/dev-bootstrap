@@ -56,11 +56,24 @@ function installWinGetPackage {
 
 # Install Applications
 installWinGetPackage 7zip.7zip
+installWinGetPackage Balena.Etcher
 installWinGetPackage Docker.DockerDesktop
+installWinGetPackage GIMP.GIMP
+installWinGetPackage Git.Git
 installWinGetPackage GitHub.GitHubDesktop
 installWinGetPackage Google.Chrome
-installWinGetPackage Postman.Postman
+installWinGetPackage Iterate.Cyberduck
+installWinGetPackage Microsoft.PowerToys
+installWinGetPackage Microsoft.VisualStudioCode
 installWinGetPackage Microsoft.WindowsTerminal
+installWinGetPackage Mozilla.Firefox
+installWinGetPackage Notepad++.Notepad++
+installWinGetPackage picpick.picpick
+installWinGetPackage Postman.Postman
+installWinGetPackage SlackTechnologies.Slack
+installWinGetPackage Spotify.Spotify
+installWinGetPackage Zoom.Zoom
+installWinGetPackage Yubico.YubikeyManager
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
