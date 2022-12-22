@@ -105,6 +105,16 @@ createShortcut -Source "$env:LocalAppData\Programs\GIMP 2\bin\gimp-2.10.exe" -Ta
 createShortcut -Source "$env:ProgramFiles\Notepad++\notepad++.exe" -Target "$HOME\npp.lnk"
 createShortcut -Source "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe" -Target "$HOME\vsc.lnk"
 
+# Set Windows Terminal settings if present
+if ( Test-Path "$HOME\.wtconfig" )
+{
+    $wtSettings="$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    if ( (Test-Path $wtSettings) -and (Get-Item $wtSettings).LinkType -ne "SymbolicLink" )
+    {
+        Remove-Item -Path $wtSettings -Force
+        New-Item -ItemType SymbolicLink -Path $wtSettings -Target "$HOME\.wtconfig"
+    }
+}
 
 # Set Windows Preferences
 ## Show hidden files, Show protected OS files, Show file extensions
