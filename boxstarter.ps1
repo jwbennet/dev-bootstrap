@@ -31,7 +31,7 @@ if ( -not ($wslDistributions -contains "dev"))
 }
 
 # Ensure the WSL user is created based on the current Windows username
-$wslUserExists=wsl id -u "$env:UserName"
+wsl id -u "$env:UserName" | Out-Null
 if (-not $?)
 {
     wsl useradd -m -G sudo -s /bin/bash "$env:UserName"
@@ -46,7 +46,7 @@ else
 function installWinGetPackage
 {
     Param ([string]$packageId)
-    $packageInstalled=winget list --id $packageId --accept-source-agreements
+    winget list --id $packageId --accept-source-agreements | Out-Null
     if ($?)
     {
         Write-Host "Package id '$packageId' is already installed"
