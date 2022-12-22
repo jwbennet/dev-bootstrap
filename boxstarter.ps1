@@ -43,7 +43,8 @@ else
     Write-Host "The user $env:UserName has already been setup."
 }
 
-function installWinGetPackage {
+function installWinGetPackage
+{
     Param ([string]$packageId)
     $packageInstalled=winget list --id $packageId --accept-source-agreements
     if ($?)
@@ -66,6 +67,9 @@ installWinGetPackage Git.Git
 installWinGetPackage GitHub.GitHubDesktop
 installWinGetPackage Google.Chrome
 installWinGetPackage Iterate.Cyberduck
+installWinGetPackage JetBrains.IntelliJIDEA.Ultimate
+installWinGetPackage Microsoft.Office
+installWinGetPackage Microsoft.OneDrive
 installWinGetPackage Microsoft.PowerToys
 installWinGetPackage Microsoft.VisualStudioCode
 installWinGetPackage Microsoft.WindowsTerminal
@@ -77,6 +81,30 @@ installWinGetPackage SlackTechnologies.Slack
 installWinGetPackage Spotify.Spotify
 installWinGetPackage Zoom.Zoom
 installWinGetPackage Yubico.YubikeyManager
+
+function createShortcut
+{
+    Param ([string]$Source, [string]$Target)
+    if (Test-Path $Target)
+    {
+        Write-Host "Shortcut for $Target already exists"
+    }
+    else
+    {
+        Write-Host "Setting up shortcut for $Source"
+        $WScriptObj = New-Object -ComObject ("WScript.Shell")
+        $Shortcut = $WscriptObj.CreateShortcut($Target)
+        $Shortcut.TargetPath = $Source
+        $Shortcut.save()
+    }
+}
+
+# Create Windows shortcuts
+createShortcut -Source "${env:ProgramFiles(x86)}\JetBrains\IntelliJ IDEA 2022.3\bin\idea64.exe" -Target "$HOME\intellij.lnk"
+createShortcut -Source "$env:LocalAppData\Programs\GIMP 2\bin\gimp-2.10.exe" -Target "$HOME\gimp.lnk"
+createShortcut -Source "$env:ProgramFiles\Notepad++\notepad++.exe" -Target "$HOME\npp.lnk"
+createShortcut -Source "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe" -Target "$HOME\vsc.lnk"
+
 
 # Set Windows Preferences
 ## Show hidden files, Show protected OS files, Show file extensions
