@@ -135,6 +135,8 @@ if ( Test-Path "$HOME\.wtconfig" )
 }
 
 # Set Windows Preferences
+## Set Windows theme
+Start-Process -FilePath "$HOME\.windows.theme"
 ## Show hidden files, Show protected OS files, Show file extensions
 Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowFileExtensions
 ## opens PC to This PC, not quick access
