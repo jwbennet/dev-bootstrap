@@ -130,7 +130,16 @@ if ( Test-Path "$HOME\.wtconfig" )
     {
         Remove-Item -Path $wtSettings -Force
         New-Item -ItemType SymbolicLink -Path $wtSettings -Target "$HOME\.wtconfig"
+        Write-Host "Updated Windows Terminal Configuration"
     }
+    else
+    {
+        Write-Host "Windows Terminal Configuration already in place"
+    }
+}
+else
+{
+    Write-Host "Windows Terminal Configuration not found"
 }
 
 # Set Windows Preferences
