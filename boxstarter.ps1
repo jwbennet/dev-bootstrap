@@ -3,10 +3,10 @@
 Enable-RemoteDesktop
 Update-ExecutionPolicy Unrestricted
 
-choco install -y chezmoi Boxstarter
+choco install -y chezmoi Boxstarter git
 RefreshEnv
 
-chezmoi init --apply https://github.com/jwbennet/dotfiles.git
+chezmoi init --apply jwbennet
 
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
@@ -72,7 +72,6 @@ installWinGetPackage 7zip.7zip
 installWinGetPackage Balena.Etcher
 installWinGetPackage Docker.DockerDesktop
 installWinGetPackage GIMP.GIMP
-installWinGetPackage Git.Git
 installWinGetPackage GitHub.GitHubDesktop
 installWinGetPackage Google.Chrome
 installWinGetPackage Iterate.Cyberduck
