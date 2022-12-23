@@ -22,7 +22,7 @@
           - emacs
           - jq
           - ssh-import-id
-          - temurin-17-jdk
+          # - temurin-17-jdk
           - terraform
           - tree
           - vault
