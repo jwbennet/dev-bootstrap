@@ -1,12 +1,45 @@
 ---
 - hosts: all
   tasks:
+    - name: Include variables files
+      ansible.builtin.include_vars:
+        dir: vars
+        extensions:
+          - 'yaml'
+    - name: Check if Maven is installed
+      ansible.builtin.stat:
+        path: "{{ maven_install_dest }}/bin/mvn"
+      register: maven_bin
+    - when: not maven_bin.stat.exists
+      block:
+        - name: Download Apache Maven {{ maven_version }}
+          ansible.builtin.get_url:
+            url: "{{ maven_download_url }}"
+            dest: "{{ maven_tmp_file }}"
+            checksum: "{{ maven_checksum }}"
+            mode: 0644
+        - name: Create installation directory
+          ansible.builtin.file:
+            name: "{{ maven_install_dest }}"
+            state: directory
+        - name: Unzip Maven Tarball
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ maven_tmp_file }}"
+            dest: "{{ maven_install_parent }}"
+      always:
+        - name: Clean up Maven Tarball
+          ansible.builtin.file:
+            path: "{{ maven_tmp_file }}"
+            state: absent
     - name: Setup symlinks
       ansible.builtin.file:
         src: "{{ item.source }}"
         dest: "{{ ansible_env.HOME }}/{{ item.target }}"
         state: link
       loop:
+        - source: "$HOME/.local/share/apache-maven-{{ maven_version}}/bin/mvn"
+          target: .local/bin/mvn
         - source: "$HOME/home/Documents"
           target: documents
         - source: "$HOME/home/Downloads"
