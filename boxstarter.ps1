@@ -50,6 +50,7 @@ wsl -u "$env:UserName" -- /bin/bash -c "`$HOME/bin/chezmoi init --apply $env:Use
 wsl -u "$env:UserName" -- /bin/bash -c "python -m pip install --user ansible --no-warn-script-location"
 wsl -u "$env:UserName" -- /bin/bash -c "git clone https://github.com/jwbennet/dev-bootstrap.git /projects/dev-bootstrap"
 wsl -u root -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && /root/.local/bin/ansible-playbook --extra-vars='wsl_username=jwbennet' main.yaml"
+wsl -u "$env:UserName" -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && `$HOME/.local/bin/ansible-playbook user.yaml"
 wsl --terminate dev
 
 function installWinGetPackage

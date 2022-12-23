@@ -2,6 +2,10 @@
 run: ## Run playbook to setup Kubernetes cluster
 	@ansible-playbook main.yaml --ask-become-pass
 
+.PHONY: run-user
+run-user: ## Run playbook to setup Kubernetes cluster
+	@ansible-playbook user.yaml
+
 .PHONY: inventory-graph
 inventory-graph: ## Display the inventory as seen from Ansible
 	@ansible-inventory --graph $(opts)
