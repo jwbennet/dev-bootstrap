@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  become: true
   tasks:
     - name: Include variables files
       ansible.builtin.include_vars:
@@ -14,6 +15,14 @@
       ansible.builtin.apt_repository:
         repo: "deb {{ hashicorp_repository_url }} {{ ansible_distribution_release }} main"
         state: present
+    - name: Add Adoptium apt key
+      ansible.builtin.apt_key:
+        url: "{{ adoptium_repository_key_url }}"
+        state: present
+    - name: Add Adoptium apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb {{ adoptium_repository_url }}/deb {{ ansible_distribution_release }} main"
+        state: present
     - name: Install development packages
       ansible.builtin.apt:
         name:
@@ -22,7 +31,7 @@
           - emacs
           - jq
           - ssh-import-id
-          # - temurin-17-jdk
+          - temurin-17-jdk
           - terraform
           - tree
           - vault

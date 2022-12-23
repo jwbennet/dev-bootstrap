@@ -1,6 +1,6 @@
 .PHONY: run
 run: ## Run playbook to setup Kubernetes cluster
-	@ansible-playbook main.yaml --ask-become-pass
+	@ansible-playbook main.yaml --extra-vars="wsl_username=$$(whoami)" --ask-become-pass
 
 .PHONY: run-user
 run-user: ## Run playbook to setup Kubernetes cluster
