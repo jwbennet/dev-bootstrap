@@ -1,7 +1,7 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
 Enable-RemoteDesktop
-# Update-ExecutionPolicy Unrestricted
+Update-ExecutionPolicy Unrestricted
 
 choco install -y chezmoi Boxstarter
 RefreshEnv
