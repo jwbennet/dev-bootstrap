@@ -10,12 +10,10 @@
       ansible.builtin.apt_key:
         url: "{{ hashicorp_repository_key_url }}"
         state: present
-      become: true
     - name: Add Hashicorp apt repo
       ansible.builtin.apt_repository:
         repo: "deb {{ hashicorp_repository_url }} {{ ansible_distribution_release }} main"
         state: present
-      become: true
     - name: Install development packages
       ansible.builtin.apt:
         name:
@@ -29,13 +27,7 @@
           - tree
           - vault
         state: latest
-      become: true
-    - name: Check if file which silences welcome message exists
-      ansible.builtin.stat:
-        path: /home/{{ ansible_user_id }}/.hushlogin
-      register: hushlogin
-    - name: Silence welcome message
-      file:
-        path: /home/{{ ansible_user_id }}/.hushlogin
-        state: touch
-      when: not hushlogin.stat.exists
+    - name: Set default WSL username
+      ansible.builtin.template:
+        src: wsl.conf.j2
+        dest: /etc/wsl.conf
