@@ -6,7 +6,7 @@ Update-ExecutionPolicy Unrestricted
 choco install -y chezmoi Boxstarter
 RefreshEnv
 
-chezmoi init --apply jwbennet
+chezmoi init --apply https://github.com/jwbennet/dotfiles.git
 
 # Windows Sub-system for Linux
 ## Download the Linux kernel update package
