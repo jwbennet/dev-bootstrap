@@ -84,7 +84,7 @@ installWinGetPackage Microsoft.VisualStudioCode
 installWinGetPackage Microsoft.WindowsTerminal
 installWinGetPackage Mozilla.Firefox
 installWinGetPackage Notepad++.Notepad++
-installWinGetPackage picpick.picpick
+installWinGetPackage NGWIN.PicPick
 installWinGetPackage Postman.Postman
 installWinGetPackage SlackTechnologies.Slack
 installWinGetPackage Spotify.Spotify
@@ -114,6 +114,15 @@ createShortcut -Source "$env:LocalAppData\Programs\GIMP 2\bin\gimp-2.10.exe" -Ta
 createShortcut -Source "$env:ProgramFiles\Notepad++\notepad++.exe" -Target "$HOME\npp.lnk"
 createShortcut -Source "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe" -Target "$HOME\vsc.lnk"
 
+function pinToQuickAccess
+{
+    Param ([string]$Target)
+    $ShellObj = New-Object -ComObject shell.application -Verbose
+    $ShellObj.Namespace($Target).Self.InvokeVerb("PinToHome")
+}
+
+pinToQuickAccess("$HOME")
+
 # Set Windows Terminal settings if present
 if ( Test-Path "$HOME\.wtconfig" )
 {
@@ -130,12 +139,22 @@ if ( Test-Path "$HOME\.wtconfig" )
 Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowFileExtensions
 ## opens PC to This PC, not quick access
 Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name LaunchTo -Value 1
+## Always expand "Show more options" in Explorer
+reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+## Disable Snap Assist
+Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "EnableSnapAssistFlyout" -Value 0
+Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "SnapAssist" -Value 0
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WindowArrangementActive" -Value 0
+
 
 # Disable various unused taskbar features in Windows 11
 Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name ShowTaskViewButton -Value 0
 Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarMn -Value 0
 Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarDa -Value 0
 Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Search -Name SearchboxTaskbarMode -Value 0
+
+# Set Time Zone
+Set-TimeZone -Id "Eastern Standard Time"
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
