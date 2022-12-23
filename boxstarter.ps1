@@ -43,6 +43,15 @@ else
     Write-Host "The user $env:UserName has already been setup."
 }
 
+# Install Ansible and use it to configure the WSL distribution
+wsl -u root -- /bin/bash -c "apt-get update && apt-get upgrade -y && apt-get install -y python3 python-is-python3 python3-pip && python -m pip install --user ansible --no-warn-script-location"
+wsl -u "$env:UserName" -- /bin/bash -c 'cd ~ && $(curl -fsLS get.chezmoi.io)'
+wsl -u "$env:UserName" -- /bin/bash -c "`$HOME/bin/chezmoi init --apply $env:UserName"
+wsl -u "$env:UserName" -- /bin/bash -c "python -m pip install --user ansible --no-warn-script-location"
+wsl -u "$env:UserName" -- /bin/bash -c "mkdir -p $HOME/projects && git clone https://github.com/jwbennet/dev-bootstrap.git `$HOME/projects/dev-bootstrap"
+wsl -u root -- /bin/bash -c "cd /home/${env:UserName}/projects/dev-bootstrap/ansible && /root/.local/bin/ansible-playbook --extra-vars='wsl_username=jwbennet' main.yaml"
+wsl --terminate dev
+
 function installWinGetPackage
 {
     Param ([string]$packageId)
