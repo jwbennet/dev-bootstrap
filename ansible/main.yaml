@@ -1,0 +1,41 @@
+---
+- hosts: all
+  tasks:
+    - name: Include variables files
+      ansible.builtin.include_vars:
+        dir: vars
+        extensions:
+          - 'yaml'
+    - name: Add Hashicorp apt key
+      ansible.builtin.apt_key:
+        url: "{{ hashicorp_repository_key_url }}"
+        state: present
+      become: true
+    - name: Add Hashicorp apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb {{ hashicorp_repository_url }} {{ ansible_distribution_release }} main"
+        state: present
+      become: true
+    - name: Install development packages
+      ansible.builtin.apt:
+        name:
+          - build-essential
+          - consul
+          - emacs
+          - jq
+          - ssh-import-id
+          - temurin-17-jdk
+          - terraform
+          - tree
+          - vault
+        state: latest
+      become: true
+    - name: Check if file which silences welcome message exists
+      ansible.builtin.stat:
+        path: /home/{{ ansible_user_id }}/.hushlogin
+      register: hushlogin
+    - name: Silence welcome message
+      file:
+        path: /home/{{ ansible_user_id }}/.hushlogin
+        state: touch
+      when: not hushlogin.stat.exists

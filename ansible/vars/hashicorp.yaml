@@ -1,0 +1,2 @@
+hashicorp_repository_url: "https://apt.releases.hashicorp.com"
+hashicorp_repository_key_url: "{{ hashicorp_repository_url }}/gpg"
