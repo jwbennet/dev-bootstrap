@@ -38,13 +38,13 @@
         dest: "{{ ansible_env.HOME }}/{{ item.target }}"
         state: link
       loop:
+        - source: "/mnt/c/Users/{{ ansible_user_id }}"
+          target: home
         - source: "$HOME/.local/share/apache-maven-{{ maven_version}}/bin/mvn"
           target: .local/bin/mvn
         - source: "$HOME/home/Documents"
           target: documents
         - source: "$HOME/home/Downloads"
           target: downloads
-        - source: "/mnt/c/Users/{{ ansible_user_id }}"
-          target: home
         - source: "/projects"
           target: projects
