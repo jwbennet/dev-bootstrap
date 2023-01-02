@@ -35,6 +35,7 @@
           - emacs
           - git
           - jq
+          - socat
           - ssh-import-id
           - temurin-17-jdk
           - terraform

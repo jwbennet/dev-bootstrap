@@ -3,7 +3,7 @@
 Enable-RemoteDesktop
 Update-ExecutionPolicy Unrestricted
 
-choco install -y chezmoi Boxstarter git
+choco install -y chezmoi Boxstarter git npiperelay
 RefreshEnv
 
 chezmoi init --apply jwbennet
@@ -79,6 +79,7 @@ installWinGetPackage Iterate.Cyberduck
 installWinGetPackage JetBrains.IntelliJIDEA.Ultimate
 installWinGetPackage Microsoft.Office
 installWinGetPackage Microsoft.OneDrive
+installWinGetPackage Microsoft.OpenSSH.Beta
 installWinGetPackage Microsoft.PowerToys
 installWinGetPackage Microsoft.VisualStudioCode
 installWinGetPackage Microsoft.WindowsTerminal
@@ -164,6 +165,36 @@ Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Search -N
 
 # Set Time Zone
 Set-TimeZone -Id "Eastern Standard Time"
+
+# Configure Windows SSH Agent
+$sshAgentService = Get-Service -Name ssh-agent
+if ($sshAgentService.Status -ne 'Running')
+{
+  Start-Service ssh-agent
+  Set-Service ssh-agent -StartupType Automatic
+  Write-Host "Started OpenSSH Agent"
+}
+else
+{
+  Write-Host "OpenSSH Agent already running"
+}
+$sshKeyAdded = ssh-add -l
+if($sshKeyAdded -eq "The agent has no identities.")
+{
+  if(Test-Path "$HOME\.ssh\homelab")
+  {
+    $sshKeyPass = Read-Host "Enter password for $HOME\.ssh\homelab:" -AsSecureString
+    $sshKeyPass | ssh-add "$HOME\.ssh\homelab"
+  }
+  else
+  {
+    Write-Host "No homelab SSH key found"
+  }
+}
+else
+{
+  Write-Host "At least one SSH key already imported"
+}
 
 #Enable-MicrosoftUpdate
 #Install-WindowsUpdate -acceptEula
