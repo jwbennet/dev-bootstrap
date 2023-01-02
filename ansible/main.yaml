@@ -23,12 +23,17 @@
       ansible.builtin.apt_repository:
         repo: "deb {{ adoptium_repository_url }}/deb {{ ansible_distribution_release }} main"
         state: present
+    - name: Add Git apt repo
+      ansible.builtin.apt_repository:
+        repo: "ppa:git-core/ppa"
+        state: present
     - name: Install development packages
       ansible.builtin.apt:
         name:
           - build-essential
           - consul
           - emacs
+          - git
           - jq
           - ssh-import-id
           - temurin-17-jdk
