@@ -68,6 +68,31 @@
           ansible.builtin.file:
             path: "{{ krew_tmp_file }}"
             state: absent
+    - name: Check if K9s is installed
+      ansible.builtin.stat:
+        path: "{{ k9s_install_dest }}/k9s"
+      register: k9s_bin
+    - when: not k9s_bin.stat.exists
+      block:
+        - name: Download K9s {{ k9s_version }}
+          ansible.builtin.get_url:
+            url: "{{ k9s_download_url }}"
+            dest: "{{ k9s_tmp_file }}"
+            mode: 0644
+        - name: Create installation directory
+          ansible.builtin.file:
+            name: "{{ k9s_install_dest }}"
+            state: directory
+        - name: Unzip k9s Tarball
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ k9s_tmp_file }}"
+            dest: "{{ k9s_install_dest }}"
+      always:
+        - name: Clean up K9s Tarball
+          ansible.builtin.file:
+            path: "{{ k9s_tmp_file }}"
+            state: absent
     - name: Setup symlinks
       ansible.builtin.file:
         src: "{{ item.source }}"
@@ -76,6 +101,8 @@
       loop:
         - source: "/mnt/c/Users/{{ ansible_user_id }}"
           target: home
+        - source: "{{ k9s_install_dest }}/k9s"
+          target: .local/bin/k9s
         - source: "{{ krew_install_dest }}/krew-linux_amd64"
           target: .local/bin/krew
         - source: "$HOME/.local/share/apache-maven-{{ maven_version}}/bin/mvn"
