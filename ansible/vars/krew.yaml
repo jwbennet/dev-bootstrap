@@ -1,0 +1,6 @@
+krew_version: "v0.4.3"
+krew_checksum: "sha256:5df32eaa0e888a2566439c4ccb2ef3a3e6e89522f2f2126030171e2585585e4f"
+krew_download_url: "https://github.com/kubernetes-sigs/krew/releases/download/{{ krew_version }}/krew-linux_amd64.tar.gz"
+krew_tmp_file: /tmp/krew-{{ krew_version }}.tar.gz
+krew_install_dest: "{{ ansible_env.HOME }}/.local/share/krew-{{ krew_version }}"
+krew_symlink_dest: "{{ ansible_env.HOME }}/.local/bin/krew"

@@ -32,6 +32,42 @@
           ansible.builtin.file:
             path: "{{ maven_tmp_file }}"
             state: absent
+    - name: Check if Krew is installed
+      ansible.builtin.stat:
+        path: "{{ krew_install_dest }}/krew-linux_amd64"
+      register: krew_bin
+    - when: not krew_bin.stat.exists
+      block:
+        - name: Download Krew {{ krew_version }}
+          ansible.builtin.get_url:
+            url: "{{ krew_download_url }}"
+            dest: "{{ krew_tmp_file }}"
+            checksum: "{{ krew_checksum }}"
+            mode: 0644
+        - name: Create installation directory
+          ansible.builtin.file:
+            name: "{{ krew_install_dest }}"
+            state: directory
+        - name: Unzip krew Tarball
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ krew_tmp_file }}"
+            dest: "{{ krew_install_dest }}"
+        - name: Install Krew into Kubectl
+          ansible.builtin.command:
+            cmd: "{{ krew_install_dest }}/krew-linux_amd64 install krew"
+        - name: Install Krew modules
+          ansible.builtin.command:
+            cmd: kubectl krew install {{ item }}
+          loop:
+            - ctx
+            - ns
+            - stern
+      always:
+        - name: Clean up Krew Tarball
+          ansible.builtin.file:
+            path: "{{ krew_tmp_file }}"
+            state: absent
     - name: Setup symlinks
       ansible.builtin.file:
         src: "{{ item.source }}"
@@ -40,6 +76,8 @@
       loop:
         - source: "/mnt/c/Users/{{ ansible_user_id }}"
           target: home
+        - source: "{{ krew_install_dest }}/krew-linux_amd64"
+          target: .local/bin/krew
         - source: "$HOME/.local/share/apache-maven-{{ maven_version}}/bin/mvn"
           target: .local/bin/mvn
         - source: "$HOME/home/Documents"
