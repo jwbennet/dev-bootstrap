@@ -55,16 +55,16 @@ wsl --terminate dev
 
 function installWinGetPackage
 {
-    Param ([string]$packageId)
-    winget list --id $packageId --accept-source-agreements | Out-Null
+    Param ([string]$PackageId, [string]$Source = "winget")
+    winget list --id $PackageId --accept-source-agreements | Out-Null
     if ($?)
     {
-        Write-Host "Package id '$packageId' is already installed"
+        Write-Host "Package id '$PackageId' is already installed"
     }
     else
     {
-        Write-Host "Installing package '$packageId'"
-        winget install --exact --id $packageId --accept-source-agreements --accept-package-agreements
+        Write-Host "Installing package '$PackageId'"
+        winget install --exact --id $PackageId --source $Source --accept-source-agreements --accept-package-agreements
     }
 }
 
@@ -91,6 +91,9 @@ installWinGetPackage SlackTechnologies.Slack
 installWinGetPackage Spotify.Spotify
 installWinGetPackage Zoom.Zoom
 installWinGetPackage Yubico.YubikeyManager
+# Microsoft Store applications
+# Trello
+installWinGetPackage 9NBLGGH4XXVW msstore
 
 function createShortcut
 {
