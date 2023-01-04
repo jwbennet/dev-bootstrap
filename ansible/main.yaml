@@ -27,6 +27,14 @@
       ansible.builtin.apt_repository:
         repo: "ppa:git-core/ppa"
         state: present
+    - name: Add Helm apt key
+      ansible.builtin.apt_key:
+        url: "https://baltocdn.com/helm/signing.asc"
+        state: present
+    - name: Add Helm apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb https://baltocdn.com/helm/stable/debian/ all main"
+        state: present
     - name: Install development packages
       ansible.builtin.apt:
         name:
@@ -34,6 +42,7 @@
           - consul
           - emacs
           - git
+          - helm
           - jq
           - socat
           - ssh-import-id
