@@ -89,8 +89,8 @@ installWinGetPackage NGWIN.PicPick
 installWinGetPackage Postman.Postman
 installWinGetPackage SlackTechnologies.Slack
 installWinGetPackage Spotify.Spotify
-installWinGetPackage Zoom.Zoom
 installWinGetPackage Yubico.YubikeyManager
+installWinGetPackage Zoom.Zoom
 # Microsoft Store applications
 # Trello
 installWinGetPackage 9NBLGGH4XXVW msstore
