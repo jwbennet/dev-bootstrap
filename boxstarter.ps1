@@ -87,6 +87,7 @@ installWinGetPackage Mozilla.Firefox
 installWinGetPackage Notepad++.Notepad++
 installWinGetPackage NGWIN.PicPick
 installWinGetPackage Postman.Postman
+installWinGetPackage RaspberryPiFoundation.RaspberryPiImager
 installWinGetPackage SlackTechnologies.Slack
 installWinGetPackage Spotify.Spotify
 installWinGetPackage Yubico.YubikeyManager
