@@ -1,60 +1,33 @@
 # Description: Boxstarter script for bootstrapping my developer workstation
 
-Enable-RemoteDesktop
+$dotfilesRepository = "jwbennet"
+
 Update-ExecutionPolicy Unrestricted
 
-choco install -y chezmoi Boxstarter git npiperelay
-RefreshEnv
-
-chezmoi init --apply --force jwbennet
-
-# Windows Sub-system for Linux
-## Download the Linux kernel update package
-choco install -y Microsoft-Windows-Subsystem-Linux -source windowsfeatures
-choco install -y VirtualMachinePlatform -source windowsfeatures
-choco install wsl2 --params "/Version:2 /Retry:true"
-
-# Check to see if the "dev" WSL distribution exsists. If not, create it.
-$wslDistributions=wsl --list --quiet
-if ( -not ($wslDistributions -contains "dev"))
-{
-    wsl --set-default-version 2
-    wsl --install --distribution Ubuntu
-    # Sleep to give the Ubuntu installation time to occur
-    Start-Sleep -Seconds 30
-    wsl --export Ubuntu "$env:TEMP\ubuntu.tar.gz"
-    wsl --import dev "$env:TEMP\wsl-dev" "$env:TEMP\ubuntu.tar.gz"
-    wsl --set-default dev
-    wsl --unregister Ubuntu
-} else {
-    Write-Host "There is already a 'dev' WSL distribution so skipping its configuration."
+function Create-Shortcut {
+  Param ([string]$Source, [string]$Target)
+  if (Test-Path $Target) {
+      Write-Host "Shortcut for $(Resolve-Path -Path $Target) already exists"
+  } else {
+      Write-Host "Setting up shortcut for $(Resolve-Path -Path $Source)"
+      $WScriptObj = New-Object -ComObject ("WScript.Shell")
+      $Shortcut = $WscriptObj.CreateShortcut($Target)
+      $Shortcut.TargetPath = $Source
+      $Shortcut.save()
+  }
 }
 
-# Ensure the WSL user is created based on the current Windows username
-wsl id -u "$env:UserName" | Out-Null
-if (-not $?)
-{
-    wsl useradd -m -G sudo -s /bin/bash "$env:UserName"
-    wsl /bin/bash -c "echo '$($env:UserName):changeme' | chpasswd"
-    wsl passwd -e "$env:UserName"
-}
-else
-{
-    Write-Host "The user $env:UserName has already been setup."
+function Get-RandomPassword {
+  param (
+      [Parameter(Mandatory)]
+      [int] $length,
+      [int] $amountOfNonAlphanumeric = 1
+  )
+  Add-Type -AssemblyName 'System.Web'
+  return [System.Web.Security.Membership]::GeneratePassword($length, $amountOfNonAlphanumeric)
 }
 
-# Install Ansible and use it to configure the WSL distribution
-wsl -u root -- /bin/bash -c "apt-get update && apt-get upgrade -y && apt-get install -y python3 python-is-python3 python3-pip && python -m pip install --user ansible --no-warn-script-location && mkdir -p /projects && chown ${env:UserName}.${env:UserName} /projects"
-wsl -u "$env:UserName" -- /bin/bash -c 'cd ~ && $(curl -fsLS get.chezmoi.io)'
-wsl -u "$env:UserName" -- /bin/bash -c "`$HOME/bin/chezmoi init --apply --force $env:UserName"
-wsl -u "$env:UserName" -- /bin/bash -c "python -m pip install --user ansible --no-warn-script-location"
-wsl -u "$env:UserName" -- /bin/bash -c "git clone https://github.com/jwbennet/dev-bootstrap.git /projects/dev-bootstrap"
-wsl -u root -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && /root/.local/bin/ansible-playbook --extra-vars='wsl_username=jwbennet' main.yaml"
-wsl -u "$env:UserName" -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && `$HOME/.local/bin/ansible-playbook user.yaml"
-wsl --terminate dev
-
-function installWinGetPackage
-{
+function Install-WinGetPackage {
     Param ([string]$PackageId, [string]$Source = "winget")
     winget list --id $PackageId --accept-source-agreements | Out-Null
     if ($?)
@@ -68,136 +41,220 @@ function installWinGetPackage
     }
 }
 
-# Install Applications
-installWinGetPackage 7zip.7zip
-installWinGetPackage Balena.Etcher
-installWinGetPackage Docker.DockerDesktop
-installWinGetPackage GIMP.GIMP
-installWinGetPackage GitHub.GitHubDesktop
-installWinGetPackage Google.Chrome
-installWinGetPackage Iterate.Cyberduck
-installWinGetPackage JetBrains.IntelliJIDEA.Ultimate
-installWinGetPackage Microsoft.Office
-installWinGetPackage Microsoft.OneDrive
-installWinGetPackage Microsoft.OpenSSH.Beta
-installWinGetPackage Microsoft.PowerToys
-installWinGetPackage Microsoft.VisualStudioCode
-installWinGetPackage Microsoft.WindowsTerminal
-installWinGetPackage Mozilla.Firefox
-installWinGetPackage Notepad++.Notepad++
-installWinGetPackage NGWIN.PicPick
-installWinGetPackage Postman.Postman
-installWinGetPackage RaspberryPiFoundation.RaspberryPiImager
-installWinGetPackage SlackTechnologies.Slack
-installWinGetPackage Spotify.Spotify
-installWinGetPackage Yubico.YubikeyManager
-installWinGetPackage Zoom.Zoom
-# Microsoft Store applications
-# Trello
-installWinGetPackage 9NBLGGH4XXVW msstore
-
-function createShortcut
-{
-    Param ([string]$Source, [string]$Target)
-    if (Test-Path $Target)
-    {
-        Write-Host "Shortcut for $Target already exists"
-    }
-    else
-    {
-        Write-Host "Setting up shortcut for $Source"
-        $WScriptObj = New-Object -ComObject ("WScript.Shell")
-        $Shortcut = $WscriptObj.CreateShortcut($Target)
-        $Shortcut.TargetPath = $Source
-        $Shortcut.save()
-    }
-}
-
-# Create Windows shortcuts
-createShortcut -Source "${env:ProgramFiles(x86)}\JetBrains\IntelliJ IDEA 2022.3\bin\idea64.exe" -Target "$HOME\intellij.lnk"
-createShortcut -Source "$env:LocalAppData\Programs\GIMP 2\bin\gimp-2.10.exe" -Target "$HOME\gimp.lnk"
-createShortcut -Source "$env:ProgramFiles\Notepad++\notepad++.exe" -Target "$HOME\npp.lnk"
-createShortcut -Source "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe" -Target "$HOME\vsc.lnk"
-
-function pinToQuickAccess
-{
+function PinTo-QuickAccess {
     Param ([string]$Target)
     $ShellObj = New-Object -ComObject shell.application -Verbose
     $ShellObj.Namespace($Target).Self.InvokeVerb("PinToHome")
 }
 
-pinToQuickAccess("$HOME")
+Write-Host "Installing and configuring dotfiles from $dotfilesRepository"
+
+choco install -y chezmoi git
+RefreshEnv
+
+chezmoi init --apply --force $dotfilesRepository
+
+$config = Get-Content "$HOME/.dev-machine.json" | ConvertFrom-Json
+
+if($null -ne $config.wslDistributions -And $config.wslDistributions.length -gt 0) {
+  Write-Host "Installing WSL if necessary"
+  choco install -y Microsoft-Windows-Subsystem-Linux -source windowsfeatures
+  choco install -y VirtualMachinePlatform -source windowsfeatures
+  choco install wsl2 --params "/Version:2 /Retry:true"
+  wsl --set-default-version 2
+
+  Write-Host "Setting up WSL distributions"
+  foreach ($wslDistribution in $config.wslDistributions) {
+    $source = $wslDistribution.source
+    $name = If($wslDistribution.name) { $wslDistribution.name } Else { $source }
+    # Check to see if the named WSL distribution exsists. If not, create it.
+    $installedDistributions=wsl --list --quiet
+    if ( -not ($installedDistributions -contains $name)) {
+        Write-Host "    Setting up $($name) from $($source)"
+        wsl --install --distribution $source
+        # Prompt user to give the source installation time to occur
+        Read-Host "Press ENTER after WSL initialization"
+        
+        if($name -ne $source) {
+          Write-Host "        Renaming $source distribution to $name"
+          wsl --export $source "$env:TEMP\$source.tar.gz"
+          wsl --import $name "$env:TEMP\wsl-$name" "$env:TEMP\$source.tar.gz"
+          Write-Host "        Unregistering the $source source distribution"
+          wsl --unregister $source
+        }
+
+        if($wslDistribution.default) {
+          Write-Host "        Setting $name as the default WSL distribution"
+          wsl --set-default $name
+        }
+    } else {
+        Write-Host "    There is already a $name WSL distribution so skipping its configuration"
+    }
+
+    # Ensure the WSL user is created based on the current Windows username
+    $wslUsername = If($wslDistribution.username) { $wslDistribution.username } Else { $env:UserName }
+    wsl -d $name id -u "$wslUsername" 2>&1 | Out-Null
+    if (-not $?) {
+        $randomPassword = Get-RandomPassword 12
+        wsl -d $name -u root useradd -m -G sudo -s /bin/bash "$wslUsername"
+        wsl -d $name -u root /bin/bash -c "echo '$($wslUsername):$randomPassword' | chpasswd"
+        wsl -d $name -u root passwd -e "$wslUsername"
+        Write-Host "        The user $wslUsername was created with password $randomPassword which should be changed"
+    }
+    else {
+        Write-Host "        The user $username has already been setup."
+    }
+
+    # Install Ansible and use it to configure the WSL distribution
+    wsl -d $name -u root -- /bin/bash -c "apt-get update && apt-get upgrade -y && apt-get install -y python3 python-is-python3 python3-pip && python -m pip install --user ansible --no-warn-script-location && mkdir -p /projects && chown ${username}.${username} /projects"
+    wsl -d $name -u "$username" -- /bin/bash -c 'cd ~ && $(curl -fsLS get.chezmoi.io)'
+    wsl -d $name -u "$username" -- /bin/bash -c "`$HOME/bin/chezmoi init --apply --force $dotfilesRepository"
+    wsl -d $name -u "$username" -- /bin/bash -c "python -m pip install --user ansible --no-warn-script-location"
+    wsl -d $name -u "$username" -- /bin/bash -c "git clone https://github.com/jwbennet/dev-bootstrap.git /projects/dev-bootstrap"
+    wsl -d $name -u root -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && /root/.local/bin/ansible-playbook --extra-vars='wsl_username=$username' main.yaml"
+    wsl -d $name -u "$username" -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && `$HOME/.local/bin/ansible-playbook user.yaml"
+    wsl --terminate $name
+  }
+}
+
+if($null -ne $config.chocolateyPackages) {
+  Write-Host "Installing desired chocolatey packages"
+  foreach ($chocolateyPackage in $config.chocolateyPackages) {
+    choco install $chocolateyPackage
+  }
+}
+
+if($null -ne $config.wingetPackages) {
+  Write-Host "Installing desired winget packages"
+  foreach ($wingetPackage in $config.wingetPackages) {
+    Install-WinGetPackage $wingetPackage
+  }
+}
+
+if($null -ne $config.msStoreApps) {
+  Write-Host "Installing desired Microsoft Store apps"
+  foreach ($msStoreApp in $config.msStoreApps) {
+    $msStoreApp -match "^([^:]*:)?(\w+)$" | Out-Null
+    Install-WinGetPackage $Matches.2 "msstore"
+  }
+}
+
+if($null -ne $config.shortcuts) {
+  Write-Host "Configuring shortcuts"
+  foreach($shortcut in $config.shortcuts) {
+    $source = $ExecutionContext.InvokeCommand.ExpandString($shortcut.source)
+    $target = $ExecutionContext.InvokeCommand.ExpandString($shortcut.target)
+    Create-Shortcut -Source $source -Target $target
+  }
+}
+
+if($null -ne $config.quickAccessItems) {
+  Write-Host "Configuring quick access items"
+  foreach($shortcut in $config.quickAccessItems) {
+    $target = $ExecutionContext.InvokeCommand.ExpandString($shortcut)
+    PinTo-QuickAccess -Target $target 
+  }
+}
 
 # Set Windows Terminal settings if present
-if ( Test-Path "$HOME\.wtconfig" )
-{
-    $wtSettings="$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-    if ( (Test-Path $wtSettings) -and (Get-Item $wtSettings).LinkType -ne "SymbolicLink" )
-    {
-        Remove-Item -Path $wtSettings -Force
-        New-Item -ItemType SymbolicLink -Path $wtSettings -Target "$HOME\.wtconfig"
-        Write-Host "Updated Windows Terminal Configuration"
-    }
-    else
-    {
-        Write-Host "Windows Terminal Configuration already in place"
-    }
-}
-else
-{
+if(Test-Path "$HOME\.wtconfig") {
+  $wtSettings="$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+  if( (Test-Path $wtSettings) -and (Get-Item $wtSettings).LinkType -ne "SymbolicLink" ) {
+      Remove-Item -Path $wtSettings -Force
+      New-Item -ItemType SymbolicLink -Path $wtSettings -Target "$HOME\.wtconfig"
+      Write-Host "Updated Windows Terminal Configuration"
+  } else {
+      Write-Host "Windows Terminal Configuration already in place"
+  }
+} else {
     Write-Host "Windows Terminal Configuration not found"
 }
 
+# Set Windows theme if present
+if(Test-Path "$HOME\.windows.theme") {
+  Start-Process -FilePath "$HOME\.windows.theme"
+  Write-Host "Windows theme set"
+} else {
+  Write-Host "No Windows theme found"
+}
+
 # Set Windows Preferences
-## Set Windows theme
-Start-Process -FilePath "$HOME\.windows.theme"
-## Show hidden files, Show protected OS files, Show file extensions
-Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowFileExtensions
-## opens PC to This PC, not quick access
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name LaunchTo -Value 1
-## Always expand "Show more options" in Explorer
-reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
-## Disable Snap Assist
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "EnableSnapAssistFlyout" -Value 0
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "SnapAssist" -Value 0
+if($null -ne $config.windowsPreferences -And $config.windowsPreferences.length -gt 0) {
+  Write-Host "Configuring Windows Preferences"
+  if($config.windowsPreferences -contains "showHiddenFiles") {
+    Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives
+    Write-Host "    Hidden files/folders/drives are now shown"
+  }
+  if($config.windowsPreferences -contains "showFileExtensions") {
+    Set-WindowsExplorerOptions -EnableShowFileExtensions
+    Write-Host "    File extensions are now shown"
+  }
+  if($config.windowsPreferences -contains "openToThisPC") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name LaunchTo -Value 1
+    Write-Host "    Computer will now open directly to drive list"
+  }
+  if($config.windowsPreferences -contains "alwaysShowRightClickContextMenu") {
+    reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve | Out-Null
+    Write-Host "    Windows 11 will now always expand the right-click menu"
+  }
+  if($config.windowsPreferences -contains "disableSnapAssist") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "EnableSnapAssistFlyout" -Value 0
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "SnapAssist" -Value 0
+    Write-Host "    Snap Assist has been disabled"
+  }
+  if($config.windowsPreferences -contains "disableTaskBarTaskView") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name ShowTaskViewButton -Value 0
+    Write-Host "    Task bar task view button has been disabled"  
+  }
+  if($config.windowsPreferences -contains "disableTaskBarMessenger") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarMn -Value 0
+    Write-Host "    Task bar messenger has been disabled"
+  }
+  if($config.windowsPreferences -contains "disableTaskBarWidgets") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarDa -Value 0
+    Write-Host "    Task bar widgets have been disabled"    
+  }
+  if($config.windowsPreferences -contains "disableTaskBarSearch") {
+    Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Search -Name SearchboxTaskbarMode -Value 0
+    Write-Host "    Task bar search has been disabled"
+  }
+  if($config.windowsPreferences -contains "enableRemoteDesktop") {
+    Enable-RemoteDesktop
+    Write-Host "    Remote Desktop has been enabled"
+  }
+}
 
-# Disable various unused taskbar features in Windows 11
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name ShowTaskViewButton -Value 0
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarMn -Value 0
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarDa -Value 0
-Set-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Search -Name SearchboxTaskbarMode -Value 0
-
-# Set Time Zone
-Set-TimeZone -Id "Eastern Standard Time"
+if($null -ne $config.timezone) {
+  Set-TimeZone -Id $config.timezone
+  Write-Host "Time zone set to $($config.timezone)"
+}
 
 # Configure Windows SSH Agent
-$sshAgentService = Get-Service -Name ssh-agent
-if ($sshAgentService.Status -ne 'Running')
-{
-  Start-Service ssh-agent
-  Set-Service ssh-agent -StartupType Automatic
-  Write-Host "Started OpenSSH Agent"
-}
-else
-{
-  Write-Host "OpenSSH Agent already running"
-}
-$sshKeyAdded = ssh-add -l
-if($sshKeyAdded -eq "The agent has no identities.")
-{
-  if(Test-Path "$HOME\.ssh\homelab")
-  {
-    $sshKeyPass = Read-Host "Enter password for $HOME\.ssh\homelab:" -AsSecureString
-    $sshKeyPass | ssh-add "$HOME\.ssh\homelab"
+if($null -ne $config.sshKeys -And $config.sshKeys.length -gt 0) {
+  Write-Host "SSH keys provided so enabling Windows OpenSSH Agent"
+  $sshAgentService = Get-Service -Name ssh-agent
+  if ($sshAgentService.Status -ne 'Running') {
+    Start-Service ssh-agent
+    Set-Service ssh-agent -StartupType Automatic
+    Write-Host "    Started OpenSSH Agent"
+  } else {
+    Write-Host "    OpenSSH Agent already running"
   }
-  else
-  {
-    Write-Host "No homelab SSH key found"
+  $sshKeyAdded = ssh-add -l
+  if($sshKeyAdded -eq "The agent has no identities.") {
+    foreach($sshKey in $config.sshKeys) {
+      $sshKey = $ExecutionContext.InvokeCommand.ExpandString($sshKey)
+      if(Test-Path $sshKey) {
+        $sshKey = Resolve-Path -Path $sshKey
+        Write-Host "Enter passphrase for ${sshKey}:"
+        ssh-add $sshKey
+      } else {
+        Write-Host "No SSH key found at $sshKey"
+      }  
+    }
+  } else {
+    Write-Host "    At least one SSH key already imported so not importing additional keys"
   }
-}
-else
-{
-  Write-Host "At least one SSH key already imported"
 }
 
 #Enable-MicrosoftUpdate
