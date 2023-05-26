@@ -111,7 +111,7 @@
           target: documents
         - source: "$HOME/home/Downloads"
           target: downloads
-        - source: /mnt/c/ProgramData/chocolatey/bin/npiperelay.exe
-          target: bin/npiperelay
+        # - source: /mnt/c/ProgramData/chocolatey/bin/npiperelay.exe
+        #   target: bin/npiperelay
         - source: "/projects"
           target: projects
