@@ -112,7 +112,7 @@ if($null -ne $config.wslDistributions -And $config.wslDistributions.length -gt 0
     wsl -d $name -u "$username" -- /bin/bash -c "python -m pip install --user ansible --no-warn-script-location"
     wsl -d $name -u "$username" -- /bin/bash -c "git clone https://github.com/jwbennet/dev-bootstrap.git /projects/dev-bootstrap"
     wsl -d $name -u root -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && /root/.local/bin/ansible-playbook --extra-vars='wsl_username=$username' main.yaml"
-    wsl -d $name -u "$username" -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && `$HOME/.local/bin/ansible-playbook user.yaml"
+    wsl -d $name -u "$username" -- /bin/bash -c "cd /projects/dev-bootstrap/ansible && `$HOME/.local/bin/ansible-galaxy install -r requirements.yml && `$HOME/.local/bin/ansible-playbook user.yaml"
     wsl --terminate $name
   }
 }

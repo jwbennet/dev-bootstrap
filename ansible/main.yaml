@@ -55,3 +55,8 @@
       ansible.builtin.template:
         src: wsl.conf.j2
         dest: /etc/wsl.conf
+    - name: Add pre-commit to default PATH
+      ansible.builtin.file:
+        src: "/home/{{ wsl_username }}/.local/bin/pre-commit"
+        dest: /usr/local/bin/pre-commit
+        state: link
