@@ -115,3 +115,7 @@
         #   target: bin/npiperelay
         - source: "/projects"
           target: projects
+    - name: Install pre-commit
+      community.general.pipx:
+        name: pre-commit
+        state: install
